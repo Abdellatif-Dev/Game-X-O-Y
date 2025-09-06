@@ -1,12 +1,5 @@
 import { useMemo, useState } from "react";
 
-/**
- * Tic-Tac-Toe (X-O-Y)
- * - 3 لاعبين
- * - يحدد الفائز فقط (ما كاينش تعادل)
- * - يتتبع النقاط
- * - اختيار حجم اللوحة
- */
 export default function TicTacToe() {
   const [size, setSize] = useState(6);
   const [winLength, setWinLength] = useState(4);
@@ -22,38 +15,32 @@ export default function TicTacToe() {
   const { winner, line } = useMemo(() => {
     const lines = [];
 
-    // helper function تولد sequence
     const range = (start, step) => [...Array(winLength).keys()].map(i => start + i * step);
 
-    // Horizontal
     for (let row = 0; row < size; row++) {
       for (let col = 0; col <= size - winLength; col++) {
         lines.push(range(row * size + col, 1));
       }
     }
 
-    // Vertical
     for (let col = 0; col < size; col++) {
       for (let row = 0; row <= size - winLength; row++) {
         lines.push(range(row * size + col, size));
       }
     }
 
-    // Diagonal ↘
     for (let row = 0; row <= size - winLength; row++) {
       for (let col = 0; col <= size - winLength; col++) {
         lines.push(range(row * size + col, size + 1));
       }
     }
 
-    // Diagonal ↙
     for (let row = 0; row <= size - winLength; row++) {
       for (let col = winLength - 1; col < size; col++) {
         lines.push(range(row * size + col, size - 1));
       }
     }
 
-    // Check winner
     for (const l of lines) {
       const first = squares[l[0]];
       if (first && l.every(i => squares[i] === first)) {
@@ -140,70 +127,91 @@ export default function TicTacToe() {
 
   return (
     <div className="min-h-screen w-full bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex items-center justify-center p-4">
-      {/* اختيار الحجم */}
       {Mode && (
         <div className="z-20 absolute flex justify-center items-center bg-black/45 w-full h-svh">
           <div className="relative w-2/5 h-2/5 flex justify-center items-center  bg-slate-800 rounded-2xl">
             <button onClick={() => setMode(false)} className=" absolute top-2 right-4 text-3xl z-10  text-red-500">X</button>
             <div>
-              <div className="flex justify-center items-center space-x-8">
-                {[4, 5, 6, 7].map((n) => (
+              <div className="flex items-center space-x-8">
+                <h1 className="text-2xl text-gray-300">Mode:</h1>
+                {[3, 4, 5, 6, 7].map((n) => (
                   <button
                     key={n}
                     onClick={() => {
                       setSize(n);
                       setSquares(Array(n * n).fill(null));
-                      setMode(false);
                       setStyle(`grid gap-3 grid-cols-${n}`);
-
                     }}
-                    className="px-4 py-2 bg-slate-700 h-12 hover:bg-slate-900 rounded-lg"
-                  >
+                    disabled={winLength > n || Players === n}
+                    className={
+                      "px-4 py-2 h-12 rounded-lg " + (size === n ? "bg-sky-700" : "bg-slate-700 hover:bg-slate-900")
+                      + ((winLength > n || Players === n) ? " opacity-40 cursor-not-allowed  ":"")
+                    } >
                     {n}x{n}
                   </button>
                 ))}
               </div>
-              <div className="flex justify-center items-center space-x-8 mt-6">
+              <div className="flex justify-start items-center space-x-8 mt-6">
+                <h1 className="text-2xl text-gray-300">عدد خنات الفوز:</h1>
                 {[3, 4, 5].map((n) => (
                   <button
                     key={n}
                     onClick={() => {
                       setWinLength(n);
-                      setMode(false);
                       nextRound()
                     }}
-                    className="px-4 py-2 bg-slate-700 h-12 hover:bg-slate-900 rounded-lg"
+                    disabled={n > size} 
+                    className={
+                      "px-4 py-2 h-12 rounded-lg " + (winLength === n ? "bg-sky-700" : "bg-slate-700 hover:bg-slate-900") 
+                      + (n > size ? " opacity-40 cursor-not-allowed  ":"")
+                    }
                   >
                     {n}
                   </button>
                 ))}
               </div>
-              <div className="flex justify-center items-center space-x-8 mt-6">
+              <div className="flex justify-start items-center space-x-8 mt-6">
+                <h1 className="text-2xl text-gray-300">عدد الاعبين:</h1>
                 <button
                   onClick={() => {
                     setScores({ X: 0, O: 0 });
                     setMoves({ X: [], O: [] });
-                    setMode(false);
                     setPlayers(2);
                     nextRound()
                   }}
-                  className="px-4 py-2 bg-slate-700 h-12 hover:bg-slate-900 rounded-lg"
+                  className={
+                    "px-4 py-2 h-12 rounded-lg " + (Players === 2 ? "bg-sky-700" : "bg-slate-700 hover:bg-slate-900")
+                  }
                 >
-                  2 player
+                  2
                 </button>
                 <button
                   onClick={() => {
                     setScores({ X: 0, O: 0, Y: 0 });
                     setMoves({ X: [], O: [], Y: [] });
-                    setMode(false);
                     setPlayers(3);
                     nextRound()
                   }}
-                  className="px-4 py-2 bg-slate-700 h-12 hover:bg-slate-900 rounded-lg"
+                  disabled={size === 3} 
+                  className={
+                    "px-4 py-2 h-12 rounded-lg " + (Players === 3 ? "bg-sky-700" : "bg-slate-700 hover:bg-slate-900")
+                    + (3 === size ? " opacity-40 cursor-not-allowed  ":"")
+                  }
                 >
-                  3 player
+                  3
                 </button>
 
+              </div>
+              <div className="flex justify-center items-center  mt-6">
+                <button
+                onClick={() => {
+                    setMode(false); 
+                  }}
+                  className="px-4 py-2 h-12 rounded-lg  bg-slate-700 hover:bg-slate-900 text-2xl text-gray-200"
+                  
+                >
+                  choiser
+                </button>
               </div>
             </div>
           </div>
@@ -211,7 +219,6 @@ export default function TicTacToe() {
       )}
 
       <div className="w-full max-w-md">
-        {/* Header */}
         <div className="mb-4 text-center">
           <h1 className="text-3xl md:text-4xl font-black tracking-tight text-white drop-shadow-sm">
             X-O-Y
@@ -229,7 +236,6 @@ export default function TicTacToe() {
           </div>
         </div>
 
-        {/* Scoreboard */}
         {
           Players === 3 ? (
             <div className="grid grid-cols-3 gap-2 mb-4">
@@ -245,7 +251,6 @@ export default function TicTacToe() {
           )
         }
 
-        {/* Board */}
         <div className="bg-slate-900/60 backdrop-blur rounded-2xl p-4 shadow-xl ring-1 ring-white/10">
           <div className={style}>
             {squares.map((val, i) => {
@@ -280,7 +285,6 @@ export default function TicTacToe() {
             })}
           </div>
 
-          {/* Status + Actions */}
           <div className="mt-4 flex items-center justify-between">
             <div className="text-slate-200 font-semibold text-lg">{status}</div>
             <div className="flex gap-2">
@@ -300,7 +304,6 @@ export default function TicTacToe() {
           </div>
         </div>
 
-        {/* Tips */}
         <p className="text-center text-slate-400 mt-3 text-sm">
           يبدأ X أولاً في الجولة 1. يتناوب من يبدأ كل جولة للعدل. <br />
           الاعبين {Players} , عدد خانات الفوز {winLength}
